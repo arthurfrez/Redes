@@ -1,9 +1,13 @@
 #include <cstdio>
 #include <winsock2.h>
 
+#define byte char
+
 using namespace std;
 
-// -lws2_32
+const byte flag = (char)126;
+
+// compilar com -lws2_32
 
 int main() {
     WSADATA WSAData;
@@ -23,7 +27,7 @@ int main() {
 
     while(true) {
       printf("Mensagem a ser enviada: ");
-      char buffer[1024];
+      byte buffer[1024];
       fgets(buffer, 1024, stdin);
 
       // removendo a quebra de linha

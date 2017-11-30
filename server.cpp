@@ -1,9 +1,14 @@
 #include <cstdio>
+#include <bitset>
 #include <winsock2.h>
+
+#define byte char
 
 using namespace std;
 
-// -lws2_32
+const byte flag = (char)126;
+
+// compilar com -lws2_32
 
 int main() {
     WSADATA WSAData;
@@ -22,7 +27,7 @@ int main() {
 
     printf("Listening for incoming connections...\n");
 
-    char buffer[1024];
+    byte buffer[1024];
     int clientAddrSize = sizeof(clientAddr);
 
     client = accept(server, (SOCKADDR *)&clientAddr, &clientAddrSize);

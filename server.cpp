@@ -1,14 +1,16 @@
 #include <cstdio>
-#include <bitset>
 #include <winsock2.h>
-
-#define byte char
+#include <unistd.h>
 
 using namespace std;
 
-const byte flag = (char)126;
-
 // compilar com -lws2_32
+
+bool startsWith(const char *pre, const char *str) {
+    size_t lenpre = strlen(pre),
+           lenstr = strlen(str);
+    return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
 
 int main() {
     WSADATA WSAData;
@@ -27,17 +29,26 @@ int main() {
 
     printf("Listening for incoming connections...\n");
 
-    byte buffer[1024];
     int clientAddrSize = sizeof(clientAddr);
 
     client = accept(server, (SOCKADDR *)&clientAddr, &clientAddrSize);
 
+    char s_buffer[5];
+    char r_buffer[5];
+
     if(client != INVALID_SOCKET) {
         printf("Client connected!\n");
 
-        while(recv(client, buffer, sizeof(buffer), 0) != 0) {
-          printf("Client says: %s\n", buffer);
-          memset(buffer, 0, sizeof(buffer));
+        while(true) {
+          recv(client, r_buffer, sizeof(r_buffer), 0);
+          printf("Client says: %s\n", r_buffer);
+
+          if(startsWith("disc", r_buffer)) break;
+
+
+          printf("Send: ");
+          fgets(s_buffer, 5, stdin);
+          send(server, s_buffer, sizeof(s_buffer), 0);
         }
 
         closesocket(client);

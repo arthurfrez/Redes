@@ -13,11 +13,16 @@ bool startsWith(const char *pre, const char *str) {
 }
 
 int main(int argc, char* argv[]) {
+    if (argc != 2) {
+      printf("usage: %s server-name\n", argv[0]);
+      return 1;
+    }
+
     WSADATA WSAData;
     SOCKET server;
     SOCKADDR_IN addr;
 
-    WSAStartup(MAKEWORD(2,0), &WSAData);
+    WSAStartup(MAKEWORD(2,2), &WSAData);
     server = socket(AF_INET, SOCK_STREAM, 0);
 
     addr.sin_addr.s_addr = inet_addr(argv[1]); // ip mesma maquina "127.0.0.1"

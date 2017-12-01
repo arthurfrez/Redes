@@ -43,10 +43,15 @@ int main() {
           recv(client, r_buffer, sizeof(r_buffer), 0);
           printf("Client says: %s\n", r_buffer);
 
-          if(startsWith("disc", r_buffer)) break;
+          if(startsWith("disc", r_buffer)) {
+            send(client, "UA", sizeof(s_buffer), 0);
+            break;
+          }
 
           printf("Send: ");
           fgets(s_buffer, 5, stdin);
+          if(s_buffer[strlen(s_buffer)-1] == '\n')
+            s_buffer[strlen(s_buffer)-1]='\0'; //removendo quebra de linha
           send(client, s_buffer, sizeof(s_buffer), 0);
         }
 

@@ -36,12 +36,16 @@ int main(int argc, char* argv[]) {
     char r_buffer[5];
 
     while(true) {
-      if(startsWith("disc", s_buffer)) break;
+      if(startsWith("disc", s_buffer)) {
+        send(server, "UA", sizeof(s_buffer), 0);
+        break;
+      }
 
       if(startsWith("rnr", r_buffer)) {
         send(server, "rr0p", sizeof(s_buffer), 0);
       }
       else if(startsWith("rr", r_buffer) && r_buffer[3] == 'f') {
+        s_buffer[2] = r_buffer[2];
         send(server, s_buffer, sizeof(s_buffer), 0);
       }
       else if(startsWith("rej", r_buffer)) {
@@ -51,6 +55,8 @@ int main(int argc, char* argv[]) {
       else {
         printf("Send: ");
         fgets(s_buffer, 5, stdin);
+        if(s_buffer[strlen(s_buffer)-1] == '\n')
+          s_buffer[strlen(s_buffer)-1]='\0'; //removendo quebra de linha
         send(server, s_buffer, sizeof(s_buffer), 0);
       }
 

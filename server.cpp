@@ -7,9 +7,7 @@ using namespace std;
 // compilar com -lws2_32
 
 bool startsWith(const char *pre, const char *str) {
-    size_t lenpre = strlen(pre),
-           lenstr = strlen(str);
-    return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+    return strncmp(pre, str, strlen(pre)) == 0;
 }
 
 int main() {
@@ -52,6 +50,13 @@ int main() {
           fgets(s_buffer, 5, stdin);
           if(s_buffer[strlen(s_buffer)-1] == '\n')
             s_buffer[strlen(s_buffer)-1]='\0'; //removendo quebra de linha
+
+          if(strlen(s_buffer) == 0) {
+            fgets(s_buffer, 5, stdin);
+            if(s_buffer[strlen(s_buffer)-1] == '\n')
+              s_buffer[strlen(s_buffer)-1]='\0';
+          }
+
           send(client, s_buffer, sizeof(s_buffer), 0);
         }
 

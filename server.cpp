@@ -17,7 +17,7 @@ int main() {
     SOCKET server, client;
     SOCKADDR_IN serverAddr, clientAddr;
 
-    WSAStartup(MAKEWORD(2,0), &WSAData);
+    WSAStartup(MAKEWORD(2,2), &WSAData);
     server = socket(AF_INET, SOCK_STREAM, 0);
 
     serverAddr.sin_addr.s_addr = INADDR_ANY;
@@ -45,10 +45,9 @@ int main() {
 
           if(startsWith("disc", r_buffer)) break;
 
-
           printf("Send: ");
           fgets(s_buffer, 5, stdin);
-          send(server, s_buffer, sizeof(s_buffer), 0);
+          send(client, s_buffer, sizeof(s_buffer), 0);
         }
 
         closesocket(client);

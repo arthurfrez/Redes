@@ -10,6 +10,19 @@ bool startsWith(const char *pre, const char *str) {
     return strncmp(pre, str, strlen(pre)) == 0;
 }
 
+int getValues(char buffer[100], int pos) {
+    char *token;
+    int actPos = 1;
+
+    token = strtok(buffer, ",");
+    while(pos != actPos) {
+      token = strtok(buffer, ",");
+      actPos += 1;
+    }
+
+    return atoi(token);
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
       printf("usage: %s server-name\n", argv[0]);
@@ -30,37 +43,159 @@ int main(int argc, char* argv[]) {
     connect(server, (SOCKADDR *)&addr, sizeof(addr));
     printf("Connected to server!\n");
 
-    char s_buffer[5];
-    char r_buffer[5];
+    char s_buffer[100];
+    char r_buffer[100];
+    int ns = 0, nr = 0;
+    int state = 0;
+    int choose;
+
 
     while(true) {
-      if(startsWith("disc", s_buffer)) {
-        send(server, "UA", sizeof(s_buffer), 0);
+      while(true) {
+        sleep(1);
+        printf("Estado = %d\n", state);
+
+        switch (state) {
+          case 0:
+           recv(server, r_buffer, sizeof(r_buffer), 0);
+           printf("Server: %s\n", r_buffer);
+           state = 1;
+           continue;
+          case 1:
+           sprintf(s_buffer, "UA");
+           send(server, s_buffer, sizeof(s_buffer), 0);
+           printf("Client: %s\n", s_buffer);
+           state = 2;
+           continue;
+          case 2:
+            recv(server, r_buffer, sizeof(r_buffer), 0);
+            printf("Server: %s\n", r_buffer);
+
+            if(startsWith("DISC", r_buffer)) {
+              printf("Ha1");
+              state = 11;
+            } else {
+              nr = getValues(r_buffer, 2);
+              ns = getValues(r_buffer, 3);
+              state = 4;
+            }
+            continue;
+          case 3:
+            recv(server, r_buffer, sizeof(r_buffer), 0);
+            printf("Server: %s\n", r_buffer);
+            state = 11;
+            continue;
+          case 4:
+            printf("\n-----------------------------------\n");
+            printf("Escolha:\n");
+            printf("0 - DISC\n");
+            printf("1 - RNR\n");
+            printf("2 - RR\n");
+            printf("3 - I\n");
+            printf("Opcao: ");
+            scanf("%d", &choose);
+            printf("\n");
+
+            if (choose == 0) {
+              sprintf(s_buffer, "DISC");
+              send(server, s_buffer, sizeof(s_buffer), 0);
+              printf("Client: %s\n", s_buffer);
+              state = 11;
+            } else if (choose == 1) {
+              sprintf(s_buffer, "RNR %d", nr);
+              send(server, s_buffer, sizeof(s_buffer), 0);
+              printf("Client: %s\n", s_buffer);
+              state = 8;
+            } else if (choose == 2) {
+              sprintf(s_buffer, "RR %d", nr);
+              send(server, s_buffer, sizeof(s_buffer), 0);
+              printf("Client: %s\n", s_buffer);
+              state = 8;
+            } else {
+              sprintf(s_buffer, "I, %d, %d", nr, ns);
+              ns++;
+              send(server, s_buffer, sizeof(s_buffer), 0);
+              printf("Client: %s\n", s_buffer);
+              state = 2;
+            }
+            continue;
+          case 5:
+            recv(server, r_buffer, sizeof(r_buffer), 0);
+            printf("Server: %s\n", r_buffer);
+            state = 12;
+            continue;
+          case 6:
+            recv(server, r_buffer, sizeof(r_buffer), 0);
+            printf("Server: %s\n", r_buffer);
+            state = 7;
+            continue;
+          case 7:
+            printf("\n-----------------------------------\n");
+            printf("Escolha:\n");
+            printf("0 - RNR\n");
+            printf("1 - RR\n");
+            printf("Opcao: ");
+            scanf("%d", &choose);
+            printf("\n");
+
+            if (choose == 0) {
+              sprintf(s_buffer, "RNR %d, F", nr);
+              send(server, s_buffer, sizeof(s_buffer), 0);
+              printf("Client: %s\n", s_buffer);
+              state = 6;
+            } else {
+              sprintf(s_buffer, "RR %d, F", nr);
+              send(server, s_buffer, sizeof(s_buffer), 0);
+              printf("Client: %s\n", s_buffer);
+              state = 8;
+            }
+            continue;
+          case 8:
+            recv(server, r_buffer, sizeof(r_buffer), 0);
+            printf("Server: %s\n", r_buffer);
+
+            if (startsWith("I", r_buffer)) {
+              nr = getValues(r_buffer, 2);
+              ns = getValues(r_buffer, 3);
+              state = 8;
+            } else if (startsWith("RR", r_buffer)) {
+              ns = getValues(r_buffer, 2);
+              state = 4;
+            } else if (startsWith("RNR", r_buffer)) {
+              ns = getValues(r_buffer, 2);
+              state = 9;
+            } else {
+              state = 11;
+            }
+            continue;
+          case 9:
+            sprintf(s_buffer, "RR, %d, P", nr);
+            state = 11;
+            continue;
+          case 10:
+            recv(server, r_buffer, sizeof(r_buffer), 0);
+            printf("Server: %s\n", r_buffer);
+
+            if (startsWith("RNR", r_buffer)) {
+              nr = getValues(r_buffer, 2);
+              state = 9;
+            } else {
+              nr = getValues(r_buffer, 2);
+              state = 4;
+            }
+            continue;
+          case 11:
+            sprintf(s_buffer, "UA");
+            send(server, s_buffer, sizeof(s_buffer), 0);
+            printf("Client: %s\n", s_buffer);
+            state = 12;
+            continue;
+          case 12:
+            break;
+        }
+
         break;
       }
-
-      if(startsWith("rnr", r_buffer)) {
-        send(server, "rr0p", sizeof(s_buffer), 0);
-      }
-      else if(startsWith("rr", r_buffer) && r_buffer[3] == 'f') {
-        s_buffer[2] = r_buffer[2];
-        send(server, s_buffer, sizeof(s_buffer), 0);
-      }
-      else if(startsWith("rej", r_buffer)) {
-        s_buffer[1] = r_buffer[3];
-        send(server, s_buffer, sizeof(s_buffer), 0);
-      }
-      else {
-        printf("Send: ");
-        fgets(s_buffer, 5, stdin);
-        if(s_buffer[strlen(s_buffer)-1] == '\n')
-          s_buffer[strlen(s_buffer)-1]='\0'; //removendo quebra de linha
-        send(server, s_buffer, sizeof(s_buffer), 0);
-      }
-
-      recv(server, r_buffer, sizeof(r_buffer), 0);
-      //if(strlen(r_buffer) == 0) recv(server, r_buffer, sizeof(r_buffer), 0);
-      printf("Server: %s\n", r_buffer);
     }
 
     closesocket(server);

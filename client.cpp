@@ -6,10 +6,16 @@ using namespace std;
 
 // compilar com -lws2_32
 
+//------------------------------------------------------------------------------
+// Metodo para checkar se a string comeca com a substring desejada
+//------------------------------------------------------------------------------
 bool startsWith(const char *pre, const char *str) {
     return strncmp(pre, str, strlen(pre)) == 0;
 }
 
+//------------------------------------------------------------------------------
+// Metodo para extrair o valor da string recebida
+//------------------------------------------------------------------------------
 int getValues(char buffer[100], int pos) {
     char *token;
     int actPos = 1;
@@ -23,7 +29,12 @@ int getValues(char buffer[100], int pos) {
     return atoi(token);
 }
 
+//==============================================================================
+// METODO PRINCIPAL
+//==============================================================================
 int main(int argc, char* argv[]) {
+
+    // caso nao exista o parametro informando o ip
     if (argc != 2) {
       printf("usage: %s server-name\n", argv[0]);
       return 1;
@@ -36,13 +47,14 @@ int main(int argc, char* argv[]) {
     WSAStartup(MAKEWORD(2,2), &WSAData);
     server = socket(AF_INET, SOCK_STREAM, 0);
 
-    addr.sin_addr.s_addr = inet_addr(argv[1]); // ip mesma maquina "127.0.0.1"
+    addr.sin_addr.s_addr = inet_addr(argv[1]);
     addr.sin_family = AF_INET;
     addr.sin_port = htons(5555);
 
     connect(server, (SOCKADDR *)&addr, sizeof(addr));
     printf("Connected to server!\n");
 
+    // variaveis do loop
     char s_buffer[100];
     char r_buffer[100];
     int ns = 0, nr = 0;
@@ -74,7 +86,7 @@ int main(int argc, char* argv[]) {
             printf("Ha1");
             state = 11;
           } else {
-            nr = getValues(r_buffer, 2);
+            nr = getValues(r_buffer, 2)+1;
             ns = getValues(r_buffer, 3);
             state = 4;
           }
@@ -154,7 +166,7 @@ int main(int argc, char* argv[]) {
           printf("Server: %s\n", r_buffer);
 
           if (startsWith("I", r_buffer)) {
-            nr = getValues(r_buffer, 2);
+            nr = getValues(r_buffer, 2)+1;
             ns = getValues(r_buffer, 3);
             state = 4;
           } else if (startsWith("RR", r_buffer)) {

@@ -18,12 +18,14 @@ bool startsWith(const char *pre, const char *str) {
 // Metodo para extrair o valor da string recebida
 //------------------------------------------------------------------------------
 int getValues(char buffer[100], int pos) {
+    char miniBuffer[100];
+    for(int i = 0; i<100; i++) miniBuffer[i] = buffer[i];
     char *token;
     int actPos = 1;
 
-    token = strtok(buffer, ",");
-    while(pos != actPos) {
-      token = strtok(buffer, ",");
+    token = strtok(miniBuffer, ", ");
+    while(actPos != pos) {
+      token = strtok(NULL, ", ");
       actPos += 1;
     }
 

@@ -17,12 +17,14 @@ bool startsWith(const char *pre, const char *str) {
 // Metodo para extrair o valor da string recebida
 //------------------------------------------------------------------------------
 int getValues(char buffer[100], int pos) {
+    char miniBuffer[100];
+    for(int i = 0; i<100; i++) miniBuffer[i] = buffer[i];
     char *token;
     int actPos = 1;
 
-    token = strtok(buffer, ",");
-    while(pos != actPos) {
-      token = strtok(buffer, ",");
+    token = strtok(miniBuffer, ", ");
+    while(actPos != pos) {
+      token = strtok(NULL, ", ");
       actPos += 1;
     }
 
@@ -64,7 +66,6 @@ int main(int argc, char* argv[]) {
 
     while(true) {
       sleep(1);
-      //printf("Estado = %d\n", state);
 
       switch (state) {
         case 0:
@@ -83,7 +84,6 @@ int main(int argc, char* argv[]) {
           printf("Server: %s\n", r_buffer);
 
           if(startsWith("DISC", r_buffer)) {
-            printf("Ha1");
             state = 11;
           } else {
             nr = getValues(r_buffer, 2)+1;

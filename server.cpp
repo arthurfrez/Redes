@@ -54,7 +54,6 @@ int main() {
     if(client != INVALID_SOCKET) {
         while(true) {
           sleep(1);
-          printf("Estado = %d\n", state);
 
           switch (state) {
       		  case 0:
@@ -96,7 +95,7 @@ int main() {
       				} else if (startsWith("I", r_buffer)) {
       					nr = getValues(r_buffer, 2);
       					ns = getValues(r_buffer, 3);
-      					state = 2;
+      					state = 8;
       				}
       			  continue;
       			case 5:

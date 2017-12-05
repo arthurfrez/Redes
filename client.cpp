@@ -51,151 +51,149 @@ int main(int argc, char* argv[]) {
 
 
     while(true) {
-      while(true) {
-        sleep(1);
-        printf("Estado = %d\n", state);
+      sleep(1);
+      //printf("Estado = %d\n", state);
 
-        switch (state) {
-          case 0:
-           recv(server, r_buffer, sizeof(r_buffer), 0);
-           printf("Server: %s\n", r_buffer);
-           state = 1;
-           continue;
-          case 1:
-           sprintf(s_buffer, "UA");
-           send(server, s_buffer, sizeof(s_buffer), 0);
-           printf("Client: %s\n", s_buffer);
-           state = 2;
-           continue;
-          case 2:
-            recv(server, r_buffer, sizeof(r_buffer), 0);
-            printf("Server: %s\n", r_buffer);
+      switch (state) {
+        case 0:
+         recv(server, r_buffer, sizeof(r_buffer), 0);
+         printf("Server: %s\n", r_buffer);
+         state = 1;
+         continue;
+        case 1:
+         sprintf(s_buffer, "UA");
+         send(server, s_buffer, sizeof(s_buffer), 0);
+         printf("Client: %s\n", s_buffer);
+         state = 2;
+         continue;
+        case 2:
+          recv(server, r_buffer, sizeof(r_buffer), 0);
+          printf("Server: %s\n", r_buffer);
 
-            if(startsWith("DISC", r_buffer)) {
-              printf("Ha1");
-              state = 11;
-            } else {
-              nr = getValues(r_buffer, 2);
-              ns = getValues(r_buffer, 3);
-              state = 4;
-            }
-            continue;
-          case 3:
-            recv(server, r_buffer, sizeof(r_buffer), 0);
-            printf("Server: %s\n", r_buffer);
+          if(startsWith("DISC", r_buffer)) {
+            printf("Ha1");
             state = 11;
-            continue;
-          case 4:
-            printf("\n-----------------------------------\n");
-            printf("Escolha:\n");
-            printf("0 - DISC\n");
-            printf("1 - RNR\n");
-            printf("2 - RR\n");
-            printf("3 - I\n");
-            printf("Opcao: ");
-            scanf("%d", &choose);
-            printf("\n");
+          } else {
+            nr = getValues(r_buffer, 2);
+            ns = getValues(r_buffer, 3);
+            state = 4;
+          }
+          continue;
+        case 3:
+          recv(server, r_buffer, sizeof(r_buffer), 0);
+          printf("Server: %s\n", r_buffer);
+          state = 11;
+          continue;
+        case 4:
+          printf("\n-----------------------------------\n");
+          printf("Escolha:\n");
+          printf("0 - DISC\n");
+          printf("1 - RNR\n");
+          printf("2 - RR\n");
+          printf("3 - I\n");
+          printf("Opcao: ");
+          scanf("%d", &choose);
+          printf("\n");
 
-            if (choose == 0) {
-              sprintf(s_buffer, "DISC");
-              send(server, s_buffer, sizeof(s_buffer), 0);
-              printf("Client: %s\n", s_buffer);
-              state = 11;
-            } else if (choose == 1) {
-              sprintf(s_buffer, "RNR %d", nr);
-              send(server, s_buffer, sizeof(s_buffer), 0);
-              printf("Client: %s\n", s_buffer);
-              state = 8;
-            } else if (choose == 2) {
-              sprintf(s_buffer, "RR %d", nr);
-              send(server, s_buffer, sizeof(s_buffer), 0);
-              printf("Client: %s\n", s_buffer);
-              state = 8;
-            } else {
-              sprintf(s_buffer, "I, %d, %d", nr, ns);
-              ns++;
-              send(server, s_buffer, sizeof(s_buffer), 0);
-              printf("Client: %s\n", s_buffer);
-              state = 2;
-            }
-            continue;
-          case 5:
-            recv(server, r_buffer, sizeof(r_buffer), 0);
-            printf("Server: %s\n", r_buffer);
-            state = 12;
-            continue;
-          case 6:
-            recv(server, r_buffer, sizeof(r_buffer), 0);
-            printf("Server: %s\n", r_buffer);
-            state = 7;
-            continue;
-          case 7:
-            printf("\n-----------------------------------\n");
-            printf("Escolha:\n");
-            printf("0 - RNR\n");
-            printf("1 - RR\n");
-            printf("Opcao: ");
-            scanf("%d", &choose);
-            printf("\n");
-
-            if (choose == 0) {
-              sprintf(s_buffer, "RNR %d, F", nr);
-              send(server, s_buffer, sizeof(s_buffer), 0);
-              printf("Client: %s\n", s_buffer);
-              state = 6;
-            } else {
-              sprintf(s_buffer, "RR %d, F", nr);
-              send(server, s_buffer, sizeof(s_buffer), 0);
-              printf("Client: %s\n", s_buffer);
-              state = 8;
-            }
-            continue;
-          case 8:
-            recv(server, r_buffer, sizeof(r_buffer), 0);
-            printf("Server: %s\n", r_buffer);
-
-            if (startsWith("I", r_buffer)) {
-              nr = getValues(r_buffer, 2);
-              ns = getValues(r_buffer, 3);
-              state = 8;
-            } else if (startsWith("RR", r_buffer)) {
-              ns = getValues(r_buffer, 2);
-              state = 4;
-            } else if (startsWith("RNR", r_buffer)) {
-              ns = getValues(r_buffer, 2);
-              state = 9;
-            } else {
-              state = 11;
-            }
-            continue;
-          case 9:
-            sprintf(s_buffer, "RR, %d, P", nr);
-            state = 11;
-            continue;
-          case 10:
-            recv(server, r_buffer, sizeof(r_buffer), 0);
-            printf("Server: %s\n", r_buffer);
-
-            if (startsWith("RNR", r_buffer)) {
-              nr = getValues(r_buffer, 2);
-              state = 9;
-            } else {
-              nr = getValues(r_buffer, 2);
-              state = 4;
-            }
-            continue;
-          case 11:
-            sprintf(s_buffer, "UA");
+          if (choose == 0) {
+            sprintf(s_buffer, "DISC");
             send(server, s_buffer, sizeof(s_buffer), 0);
             printf("Client: %s\n", s_buffer);
-            state = 12;
-            continue;
-          case 12:
-            break;
-        }
+            state = 5;
+          } else if (choose == 1) {
+            sprintf(s_buffer, "RNR %d", nr);
+            send(server, s_buffer, sizeof(s_buffer), 0);
+            printf("Client: %s\n", s_buffer);
+            state = 6;
+          } else if (choose == 2) {
+            sprintf(s_buffer, "RR %d", nr);
+            send(server, s_buffer, sizeof(s_buffer), 0);
+            printf("Client: %s\n", s_buffer);
+            state = 6;
+          } else {
+            sprintf(s_buffer, "I, %d, %d", nr, ns);
+            ns++;
+            send(server, s_buffer, sizeof(s_buffer), 0);
+            printf("Client: %s\n", s_buffer);
+            state = 8;
+          }
+          continue;
+        case 5:
+          recv(server, r_buffer, sizeof(r_buffer), 0);
+          printf("Server: %s\n", r_buffer);
+          state = 12;
+          continue;
+        case 6:
+          recv(server, r_buffer, sizeof(r_buffer), 0);
+          printf("Server: %s\n", r_buffer);
+          state = 7;
+          continue;
+        case 7:
+          printf("\n-----------------------------------\n");
+          printf("Escolha:\n");
+          printf("0 - RNR\n");
+          printf("1 - RR\n");
+          printf("Opcao: ");
+          scanf("%d", &choose);
+          printf("\n");
 
-        break;
+          if (choose == 0) {
+            sprintf(s_buffer, "RNR %d, F", nr);
+            send(server, s_buffer, sizeof(s_buffer), 0);
+            printf("Client: %s\n", s_buffer);
+            state = 6;
+          } else {
+            sprintf(s_buffer, "RR %d, F", nr);
+            send(server, s_buffer, sizeof(s_buffer), 0);
+            printf("Client: %s\n", s_buffer);
+            state = 8;
+          }
+          continue;
+        case 8:
+          recv(server, r_buffer, sizeof(r_buffer), 0);
+          printf("Server: %s\n", r_buffer);
+
+          if (startsWith("I", r_buffer)) {
+            nr = getValues(r_buffer, 2);
+            ns = getValues(r_buffer, 3);
+            state = 4;
+          } else if (startsWith("RR", r_buffer)) {
+            ns = getValues(r_buffer, 2);
+            state = 4;
+          } else if (startsWith("RNR", r_buffer)) {
+            ns = getValues(r_buffer, 2);
+            state = 9;
+          } else {
+            state = 11;
+          }
+          continue;
+        case 9:
+          sprintf(s_buffer, "RR, %d, P", nr);
+          state = 11;
+          continue;
+        case 10:
+          recv(server, r_buffer, sizeof(r_buffer), 0);
+          printf("Server: %s\n", r_buffer);
+
+          if (startsWith("RNR", r_buffer)) {
+            nr = getValues(r_buffer, 2);
+            state = 9;
+          } else {
+            nr = getValues(r_buffer, 2);
+            state = 4;
+          }
+          continue;
+        case 11:
+          sprintf(s_buffer, "UA");
+          send(server, s_buffer, sizeof(s_buffer), 0);
+          printf("Client: %s\n", s_buffer);
+          state = 12;
+          continue;
+        case 12:
+          break;
       }
+
+      break;
     }
 
     closesocket(server);
